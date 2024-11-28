@@ -8,8 +8,6 @@ def pmx(parents, num_children):#采用部分匹配交叉，该帖子的演示十
     #print("half_size = ",half_size)
     while num_remain > 0:
         # 对父系种群进行分割
-        # print('num_remain:',num_remain)
-        # print('half_size:',half_size)
         np.random.shuffle(parents)
         parent1 = parents[:half_size]
         parent2 = parents[half_size:]
@@ -109,8 +107,6 @@ def edge_crossover(parents, num_children,dis_matrix):
     half_size = len(parents) // 2
     size = len(parents[0])
     while num_remain > 0:
-        # print('num_remain:',num_remain)
-        # print('half_size=',half_size)
         # 对父系种群进行分割
         np.random.shuffle(parents)
         parent1 = parents[:half_size]
@@ -164,7 +160,6 @@ def edge_crossover(parents, num_children,dis_matrix):
                             candidate_point = int(k[:len(k)-1])#除去最右边的"+"
                             if used_table[candidate_point] == 0:
                                 current_element = candidate_point
-                                #print(candidate_point)
                                 flag = 1
                                 break
                         else:#有可能公共边对应的节点被占了，因此还是得记录其他边
@@ -189,7 +184,6 @@ def edge_crossover(parents, num_children,dis_matrix):
                 used_table[current_element] += 1
             children.append(child)
         num_remain -= half_size
-    #print(children)
     return np.array(children)
 
 def edge_choose(current_element,candidate, dis_matrix, used_table):

@@ -43,7 +43,11 @@ def genetic_algorithm(train_data, num_generations, pop_size, crossover_rate, mut
     record_precision = []
     for generation in range(num_generations):
         initial_time = time.perf_counter()
+
+        #selection操作
         parents = selection(population, fitness_windowing(fitness), num_parents, selection_index, distance_matrix)
+
+        #crossover操作
         #在进行选择操作时优化fitness
         children = pmx(parents, 7 * num_parents)  # 感觉产生后代的数量应该要为num_parents才对，而不是pop_size - num_parents
         #children = edge_crossover(parents,7 * num_parents,distance_matrix)
@@ -52,9 +56,9 @@ def genetic_algorithm(train_data, num_generations, pop_size, crossover_rate, mut
             children_fitness = fitness_function(children,distance_matrix)
         else:
             children_fitness = parallel_fitness_function(children,distance_matrix,num_cpu)
-        # print('children:',len(children),'children_fitness:',len(children_fitness))
-        # # 拿适应值大的个体再次进行局部搜索以替换适应值小的个体（有待考虑）
-        # print(num_replace)
+
+        #replace操作
+        # Worst Replace拿适应值大的个体再次进行局部搜索以替换适应值小的个体（有待考虑）
         unique_children, uni_index = np.unique(children, return_index=True, axis=0)
         temp_fitness = children_fitness[uni_index]
         max_index = temp_fitness.argsort()[::-1]
@@ -63,17 +67,22 @@ def genetic_algorithm(train_data, num_generations, pop_size, crossover_rate, mut
             current_worst_idx = fitness.argmin()
             population[current_worst_idx] = unique_children[max_index[i]]
             fitness[current_worst_idx] = temp_fitness[max_index[i]]
+
+        #
+        # children_index = children_fitness.argsort()[::-1]
+        # children_index = children_index[:pop_size]
+        # population = children[children_index]
+        # fitness = children_fitness[children_index]
+
         # 应用2-opt局部搜索优化每个个体
         _, uni_index = np.unique(population,return_index= True,axis= 0)
         if len(uni_index) > num_elite:
             uni_index = uni_index[:num_elite]
-        # uni_index = current_best_idx[0:num_elite]
         #对于适应度高的个体，在其所有领域进行搜索,应该在领域搜索的时候就更新fitness，否则多次更新fitness太耗费时间了
         if is_parallel is False:
             population, fitness, overall_tabu = tabu_two_opt(population, fitness, distance_matrix, uni_index,
                                                              0, overall_tabu)  # index是告诉函数是否进行彻底的领域搜索，0表示彻底的搜索
         # 对于适应度高的个体，只在其部分领域内进行搜索（若问题规模小，可考虑全部使用所有邻域内搜索，但这样一来变异的用处似乎就小了）
-        #uni_index = current_best_idx[num_elite:pop_size]
         else:
             population, fitness, overall_tabu = parallel_two_opt(population, fitness, distance_matrix, uni_index,
                                                              0, overall_tabu,num_workers=num_cpu)  # index是告诉函数是否进行彻底的领域搜索，0表示彻底的搜索

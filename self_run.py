@@ -8,7 +8,6 @@ if __name__ == "__main__":
     #data = [["ch130.tsp",6110]]
     #["gr202.tsp",40160]
     # 运行遗传算法
-    #parallel_run(data,10)
     for i in range(5):
         best_sol, best_dist, best_gen, record_gen, record_dis, record_time, record_accurate, record_unique = genetic_algorithm(
             train_data=data[i],
